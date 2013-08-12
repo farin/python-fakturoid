@@ -5,6 +5,7 @@ import sys
 from decimal import Decimal
 from dateutil.parser import parse
 
+__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
 
 if sys.version_info[0] >= 3: # Python 3
     basestring = str
@@ -36,7 +37,7 @@ class Model(UnicodeMixin):
             if value and isinstance(value, basestring):
                 if field.endswith('_at'):
                     fields[field] = parse(value)
-                elif field.endswith('_on') or field.endswith('_due'):
+                elif field.endswith('_on') or field.endswith('_due') or field.endswith('_date'):
                     fields[field] = parse(value).date()
                 elif field in self.Meta.decimal:
                     fields[field] = Decimal(value)
@@ -87,6 +88,7 @@ class Account(Model):
 
 class Subject(Model):
     """See https://github.com/fakturoid/api/blob/master/sections/subject.md for complete field reference."""
+    name = None
 
     class Meta:
         readonly = ['id', 'html_url', 'url', 'updated_at']
@@ -94,37 +96,6 @@ class Subject(Model):
 
     def __unicode__(self):
         return self.name
-
-
-class Invoice(Model):
-    """See https://github.com/fakturoid/api/blob/master/sections/invoice.md for complete field reference."""
-
-    class Meta:
-        readonly = ['id', 'html_url', 'url', 'updated_at', 'proforma', 'due_on', 'subtotal', 'total'
-            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount',
-            'reminder_sent_at', 'sent_at', 'subject_url']
-        decimal = ['exchange_rate', 'subtotal', 'total',
-            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount']
-
-    def __unicode__(self):
-        return self.number
-
-    def is_field_writable(self, field, value):
-        if field == 'lines' and self.id:
-            #HACK API is not able to modify existing invoice lines (it currently performs only append)
-            return False
-        if field.startswith('your_'):
-            return False
-        return super(Invoice, self).is_field_writable(field, value)
-
-    def update(self, fields):
-        if 'lines' in fields:
-            self.__dict__['lines'] = []
-            for line in fields.pop('lines'):
-                if not isinstance(line, InvoiceLine):
-                    line = InvoiceLine(**line)
-                self.lines.append(line)
-        super(Invoice, self).update(fields)
 
 
 class InvoiceLine(Model):
@@ -146,3 +117,52 @@ class InvoiceLine(Model):
                 return self.name
             else:
                 return "{0} {1}".format(self.quantity, self.name)
+
+
+class AbstractInvoice(Model):
+    lines = []
+
+    def update(self, fields):
+        if 'lines' in fields:
+            self.lines = []
+            for line in fields.pop('lines'):
+                if not isinstance(line, InvoiceLine):
+                    line = InvoiceLine(**line)
+                self.lines.append(line)
+        super(AbstractInvoice, self).update(fields)
+
+    def is_field_writable(self, field, value):
+        if field == 'lines' and self.id:
+            #HACK API is not able to modify existing invoice/generators lines (it currently performs only append)
+            return False
+        if field.startswith('your_'):
+            return False
+        return super(AbstractInvoice, self).is_field_writable(field, value)
+
+
+class Invoice(AbstractInvoice):
+    """See https://github.com/fakturoid/api/blob/master/sections/invoice.md for complete field reference."""
+    number = None
+
+    class Meta:
+        readonly = ['id', 'html_url', 'url', 'updated_at', 'proforma', 'due_on', 'subtotal', 'total'
+            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount',
+            'reminder_sent_at', 'sent_at', 'subject_url']
+        decimal = ['exchange_rate', 'subtotal', 'total',
+            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount']
+
+    def __unicode__(self):
+        return self.number
+
+
+class Generator(AbstractInvoice):
+    """See https://github.com/fakturoid/api/blob/master/sections/generator.md for complete field reference."""
+    name = None
+
+    class Meta:
+        readonly = ['id', 'html_url', 'url', 'updated_at', 'subtotal', 'total'
+            'native_subtotal', 'native_total', 'subject_url']
+        decimal = ['exchange_rate', 'subtotal', 'total', 'native_subtotal', 'native_total']
+
+    def __unicode__(self):
+        return self.name

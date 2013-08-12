@@ -91,11 +91,19 @@ fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from late
                     # must read all invoice pages
 ```
 
+**`Fakturoid.generator(id)`**
+
+Returns `Generator` instance.
+
+**`Fakturoid.generators(recurring=None, subject_id=None, since=None)`**
+
+Use `recurring=False`/`True` parameter to load recurring or simple templates only.
+
 **`Fakturoid.save(model)`**
 
-Create or modify `Subject` or `Invoice`. 
+Create or modify `Subject` or `Invoice`.
 
-Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes 
+Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes
 can be updated and `lines` property is ignored during save.
 
 **`Fakturoid.delete(model)`**
@@ -110,12 +118,19 @@ Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and
 
 **`Fakturoid.Account`**
 
-[github.com/fakturoid/api/sections/account.md](https://github.com/fakturoid/api/blob/master/sections/account.md) 
+[github.com/fakturoid/api/sections/account.md](https://github.com/fakturoid/api/blob/master/sections/account.md)
 
 **`Fakturoid.Subject`**
 
-[github.com/fakturoid/api/sections/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md) 
+[github.com/fakturoid/api/sections/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md)
 
-**`Fakturoid.Invoice` `Fakturoid.InvoiceLine`**
+**`Fakturoid.Invoice`
+`Fakturoid.InvoiceLine`**
 
-[github.com/fakturoid/api/sections/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md) 
+[github.com/fakturoid/api/sections/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md)
+
+**`Fakturoid.Generator`**
+
+[github.com/fakturoid/api/sections/generator.md](https://github.com/fakturoid/api/blob/master/sections/generator.md)
+
+Use `InvoiceLine` for generator lines

@@ -3,13 +3,13 @@ from datetime import date, datetime
 
 import requests
 
-from fakturoid.models import Account, Subject, Invoice
+from fakturoid.models import Account, Subject, Invoice, Generator
 from fakturoid.paging import PagedResource
 
 __all__ = ['Fakturoid']
 
 
-class Fakturoid:
+class Fakturoid(object):
     subdomain = None
     api_key = None
     user_agent = 'python-fakturoid (https://github.com/farin/python-fakturoid)'
@@ -24,7 +24,8 @@ class Fakturoid:
         self._sections = {
             Account: AccountApi(self),
             Subject: SubjectsApi(self),
-            Invoice: InvoicesApi(self)
+            Invoice: InvoicesApi(self),
+            Generator: GeneratorsApi(self),
         }
 
     def account(self):
@@ -42,6 +43,12 @@ class Fakturoid:
     def invoices(self, *args, **kwargs):
         return self._sections[Invoice].find(*args, **kwargs)
 
+    def generator(self, id):
+        return self._sections[Generator].load(id)
+
+    def generators(self, *args, **kwargs):
+        return self._sections[Generator].find(*args, **kwargs)
+
     def save(self, obj):
         section = self._sections.get(type(obj))
         if not section or not hasattr(section, 'save'):
@@ -58,19 +65,19 @@ class Fakturoid:
         url = "https://{0}.fakturoid.cz/api/v1/{1}.json".format(self.subdomain, endpoint)
         headers = {'User-Agent': self.user_agent}
         headers.update(kwargs.pop('headers', {}))
-        response = getattr(requests, method)(url, auth=('', self.api_key), headers=headers, **kwargs)
+        r = getattr(requests, method)(url, auth=('', self.api_key), headers=headers, **kwargs)
         try:
-            json_result = response.json()
+            json_result = r.json()
         except:
             json_result = None
 
-        if response.status_code == success_status:
+        if r.status_code == success_status:
             return json_result
 
         if json_result and "errors" in json_result:
             raise ValueError(json_result["errors"])
 
-        response.raise_for_status()
+        r.raise_for_status()
 
     def _get(self, endpoint, params=None):
         return self._make_request('get', 200, endpoint, params=params)
@@ -85,7 +92,7 @@ class Fakturoid:
         return self._make_request('delete', 204, endpoint)
 
 
-class Section:
+class Section(object):
     api = None
 
     def __init__(self, api):
@@ -111,6 +118,31 @@ class Section:
             return model_type(**result)
 
 
+class CrudSection(Section):
+    model_type = None
+    endpoint = None
+
+    def load(self, id):
+        if not isinstance(id, int):
+            raise TypeError('id must be int')
+        return self.unpack(self.model_type, '{0}/{1}'.format(self.endpoint, id))
+
+    def find(self, params={}, endpoint=None):
+        return self.unpack(self.model_type, endpoint or self.endpoint, params=params)
+
+    def save(self, model):
+        if model.id:
+            result = self.api._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
+        else:
+            result = self.api._post(self.endpoint, model.get_fields())
+        model.update(result)
+
+
+    def delete(self, model):
+        id = self.extract_id(self.model_type, model)
+        self.api._delete('{0}/{1}'.format(self.endpoint, id))
+
+
 class AccountApi(Section):
     """API resource https://github.com/fakturoid/api/blob/master/sections/account.md"""
 
@@ -118,13 +150,10 @@ class AccountApi(Section):
         return self.unpack(Account, 'account')
 
 
-class SubjectsApi(Section):
+class SubjectsApi(CrudSection):
     """API resource https://github.com/fakturoid/api/blob/master/sections/subject.md"""
-
-    def load(self, id):
-        if not isinstance(id, int):
-            raise TypeError('id must be int')
-        return self.unpack(Subject, 'subjects/{0}'.format(id))
+    model_type = Subject
+    endpoint = 'subjects'
 
     def find(self, since=None):
         params = {}
@@ -132,32 +161,18 @@ class SubjectsApi(Section):
             if not isinstance(since, (datetime, date)):
                 raise TypeError("'since' parameter must be date or datetime")
             params['since'] = since.isoformat()
-        return self.unpack(Subject, 'subjects', params=params)
-
-    def save(self, subject):
-        if getattr(subject, 'id', None):
-            result = self.api._put('subjects/{0}'.format(subject.id), subject.get_fields())
-        else:
-            result = self.api._post('subjects', subject.get_fields())
-        subject.update(result)
-
-    def delete(self, subject):
-        id = self.extract_id(Subject, subject)
-        self.api._delete('subjects/{0}'.format(id))
+        return super(SubjectsApi, self).find(params)
 
 
-class InvoicesApi(Section):
+class InvoicesApi(CrudSection):
     """API https://github.com/fakturoid/api/blob/master/sections/invoice.md
 
     If number argument is givent returs single Invoice object (or None), otherwise iterable list of invoices are returned.
     """
+    model_type = Invoice
+    endpoint = 'invoices'
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
-
-    def load(self, id):
-        if not isinstance(id, int):
-            raise TypeError('id must be int')
-        return self.unpack(Invoice, 'invoices/{0}'.format(id))
 
     def find(self, proforma=None, subject_id=None, since=None, number=None, status=None):
         params = {}
@@ -177,24 +192,13 @@ class InvoicesApi(Section):
             params['status'] = status
 
         if proforma is None:
-            endpoint = 'invoices'
+            endpoint = self.endpoint
         elif proforma:
-            endpoint = 'invoices/proforma'
+            endpoint = '{0}/proforma'.format(self.endpoint)
         else:
-            endpoint = 'invoices/regular'
+            endpoint = '{0}/regular'.format(self.endpoint)
 
         return InvoiceList(self, endpoint, params)
-
-    def save(self, invoice):
-        if getattr(invoice, 'id', None):
-            result = self.api._put('invoices/{0}'.format(invoice.id), invoice.get_fields())
-        else:
-            result = self.api._post('invoices', invoice.get_fields())
-        invoice.update(result)
-
-    def delete(self, invoice):
-        id = self.extract_id(Invoice, invoice)
-        self.api._delete('invoices/{0}'.format(id))
 
 
 class InvoiceList(PagedResource):
@@ -208,3 +212,38 @@ class InvoiceList(PagedResource):
         params = {'page': n + 1}
         params.update(self.params)
         return list(self.section_api.unpack(Invoice, self.endpoint, params=params))
+
+
+class GeneratorsApi(CrudSection):
+    model_type = Generator
+    endpoint = 'generators'
+
+    def find(self, recurring=None, subject_id=None, since=None):
+        params = {}
+        if subject_id:
+            if not isinstance(subject_id, int):
+                raise TypeError("'subject_id' parameter must be int")
+            params['subject_id'] = subject_id
+        if since:
+            if not isinstance(since, (datetime, date)):
+                raise TypeError("'since' parameter must be date or datetime")
+            params['since'] = since.isoformat()
+
+        if recurring is None:
+            endpoint = self.endpoint
+        elif recurring:
+            # HACK API is broken, filter manually on client side
+            # endpoint = '{0}/recurring'.format(self.endpoint)
+            endpoint = self.endpoint
+        else:
+            endpoint = '{0}/template'.format(self.endpoint)
+
+        generators = super(GeneratorsApi, self).find(params, endpoint)
+        # HACK see above
+        if recurring is True:
+            generators = filter(lambda g: g.recurring, generators)
+        # ENDHACK
+        return generators
+
+
+

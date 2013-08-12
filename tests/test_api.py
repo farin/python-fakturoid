@@ -52,15 +52,32 @@ class InvoiceTestCase(FakturoidTestCase):
     def test_load(self, mock):
         invoice = self.fa.invoice(9)
 
-        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/invoices/9.json', mock.call_args[0][0])        
+        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/invoices/9.json', mock.call_args[0][0])
         self.assertEquals('2012-0004', invoice.number)
 
     @patch('requests.get', return_value=response('invoices.json'))
-    def test_load(self, mock):
+    def test_find(self, mock):
         invoice = self.fa.invoices()[:10]
 
-        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/invoices.json', mock.call_args[0][0])        
+        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/invoices.json', mock.call_args[0][0])
         #TODO paging test
+
+
+class GeneratorTestCase(FakturoidTestCase):
+
+    @patch('requests.get', return_value=response('generator_4.json'))
+    def test_load(self, mock):
+        g = self.fa.generator(4)
+
+        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/generators/4.json', mock.call_args[0][0])
+        self.assertEquals('Podpora', g.name)
+
+    @patch('requests.get', return_value=response('generators.json'))
+    def test_find(self, mock):
+        generators = self.fa.generators()
+
+        self.assertEquals('https://mydomain.fakturoid.cz/api/v1/generators.json', mock.call_args[0][0])
+        self.assertEquals(2, len(generators))
 
 
 if __name__ == '__main__':
