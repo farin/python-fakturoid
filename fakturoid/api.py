@@ -79,8 +79,6 @@ class Fakturoid:
         return self._make_request('post', 201, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
     def _put(self, endpoint, data):
-        import pprint
-        pprint.pprint(data)
         return self._make_request('put', 200, endpoint,  headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
     def _delete(self, endpoint):
