@@ -22,6 +22,8 @@ setup(
     keywords=['fakturoid', 'accounting'],
     packages=['fakturoid'],
     install_requires=['requests', 'python-dateutil'],
+    tests_require=['mock'],
+    test_suite="tests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

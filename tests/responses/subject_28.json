@@ -1,0 +1,22 @@
+{
+  "id": 28,
+  "custom_id": null,
+  "name": "MICROSOFT s.r.o.",
+  "street": "Vysko\u010dilova 1461/2a",
+  "street2": null,
+  "city": "Praha",
+  "zip": "14000",
+  "country": "\u010cesk\u00e1 republika",
+  "registration_no": "47123737",
+  "vat_no": "CZ47123737",
+  "bank_account": "",
+  "iban": "",
+  "full_name": "",
+  "email": "",
+  "email_copy": "",
+  "phone": "",
+  "web": "",
+  "html_url": "https://subdomena.fakturoid.cz/subjects/28",
+  "url": "https://subdomena.fakturoid.cz/api/v1/subjects/28.json",
+  "updated_at":"2012-06-02T09:34:47+02:00"
+}
