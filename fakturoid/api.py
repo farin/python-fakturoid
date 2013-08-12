@@ -30,11 +30,17 @@ class Fakturoid:
     def account(self):
         return self._sections[Account].load()
 
+    def subject(self, id):
+        return self._sections[Subject].load(id)
+
     def subjects(self, *args, **kwargs):
-        return self._sections[Subject].load(*args, **kwargs)
+        return self._sections[Subject].find(*args, **kwargs)
+
+    def invoice(self, id):
+        return self._sections[Invoice].load(id)
 
     def invoices(self, *args, **kwargs):
-        return self._sections[Invoice].load(*args, **kwargs)
+        return self._sections[Invoice].find(*args, **kwargs)
 
     def save(self, obj):
         section = self._sections.get(type(obj))
@@ -117,13 +123,18 @@ class AccountApi(Section):
 class SubjectsApi(Section):
     """API resource https://github.com/fakturoid/api/blob/master/sections/subject.md"""
 
-    def load(self, id=None):
-        if id:
-            if not isinstance(id, int):
-                raise TypeError('id must be int')
-            return self.unpack(Subject, 'subjects/{0}'.format(id))
-        else:
-            return self.unpack(Subject, 'subjects')
+    def load(self, id):
+        if not isinstance(id, int):
+            raise TypeError('id must be int')
+        return self.unpack(Subject, 'subjects/{0}'.format(id))
+
+    def find(self, since=None):
+        params = {}
+        if since:
+            if not isinstance(since, (datetime, date)):
+                raise TypeError("'since' parameter must be date or datetime")
+            params['since'] = since.isoformat()
+        return self.unpack(Subject, 'subjects', params=params)
 
     def save(self, subject):
         if getattr(subject, 'id', None):
@@ -145,14 +156,12 @@ class InvoicesApi(Section):
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
 
-    def load(self, id=None, proforma=None, subject_id=None, since=None, number=None, status=None):
-        if id:
-            if proforma or subject_id or since or number or status:
-                raise ValueError("Invalid ussage. Load by id not allow any other filtering argument.")
-            if not isinstance(id, int):
-                raise TypeError('id must be int')
-            return self.unpack(Invoice, 'invoices/{0}'.format(id))
+    def load(self, id):
+        if not isinstance(id, int):
+            raise TypeError('id must be int')
+        return self.unpack(Invoice, 'invoices/{0}'.format(id))
 
+    def find(self, proforma=None, subject_id=None, since=None, number=None, status=None):
         params = {}
         if subject_id:
             if not isinstance(subject_id, int):

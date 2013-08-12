@@ -31,7 +31,7 @@ Print 25 regular invoices in year 2013:
 
 Delete subject with id 27:
 
-    subject = fa.subjects(27)
+    subject = fa.subject(27)
     fa.delete(subject)
 
 And finally create new invoice:
@@ -69,23 +69,23 @@ Returns account model.
 
 [API/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md)
 
-####Fakturoid.subjects(id)
+####Fakturoid.subject(id)
 
 Returns subject model by id
 
-####Fakturoid.subjects()
+####Fakturoid.subjects(since=None)
 
 Returns all subjects.
 
 ### Invoices
 
-####Fakturoid.invoices(id)
+####Fakturoid.invoice(id)
 
 Returns invoice model by id [API/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md)
 
 ####Fakturoid.invoices(proforma=None, subject_id=None, since=None, number=None, status=None)
 
-Use `proforma=False`/`True` to load regular or proforma invoices only.
+Use `proforma=False`/`True` parameter to load regular or proforma invoices only.
 
 Returns list of invoices. Invoices are lazily loaded according to slicing.
 Be careful with negative indexes. JSON API dosen't provide invoice count so
