@@ -60,23 +60,23 @@ print(invoice.due_on)
 
 ## API
 
-**`Fakturoid.account()`**
+<code>Fakturoid.<b>account()</b></code>
 
 Returns `Account` instance. Account is readonly and can't be updated by API.
 
-**`Fakturoid.subject(id)`**
+<code>Fakturoid.<b>subject(id)</b></code>
 
 Returns `Subject` instance.
 
-**`Fakturoid.subjects(since=None)`**
+<code>Fakturoid.<b>subjects(since=None)</b></code>
 
 Loads all subjects. If since (`date` or `datetime`) paramter is passed, retuns only subjects created since given date.
 
-**`Fakturoid.invoce(id)`**
+<code>Fakturoid.<b>invoce(id)</b></code>
 
 Returns `Invoice` instance.
 
-**`Fakturoid.invoices(proforma=None, subject_id=None, since=None, number=None, status=None)`**
+<code>Fakturoid.<b>invoices(proforma=None, subject_id=None, since=None, number=None, status=None)</b></code>
 
 Use `proforma=False`/`True` parameter to load regular or proforma invoices only.
 
@@ -91,22 +91,22 @@ fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from late
                     # must read all invoice pages
 ```
 
-**`Fakturoid.generator(id)`**
+<code>Fakturoid.<b>generator(id)</b></code>
 
 Returns `Generator` instance.
 
-**`Fakturoid.generators(recurring=None, subject_id=None, since=None)`**
+<code>Fakturoid.<b>generators(recurring=None, subject_id=None, since=None)</b></code>
 
 Use `recurring=False`/`True` parameter to load recurring or simple templates only.
 
-**`Fakturoid.save(model)`**
+<code>Fakturoid.<b>save(model)</b></code>
 
 Create or modify `Subject` or `Invoice`.
 
 Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes
 can be updated and `lines` property is ignored during save.
 
-**`Fakturoid.delete(model)`**
+<code>Fakturoid.<b>delete(model)</b></code>
 
 Delete `Subject` or `Invoice`.
 
@@ -116,20 +116,20 @@ All models fields are named same as  [Fakturoid API](https://github.com/fakturoi
 
 Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and `datetime.datetime` types.
 
-**`Fakturoid.Account`**
+<code>Fakturoid.<b>Account</b></code>
 
 [github.com/fakturoid/api/sections/account.md](https://github.com/fakturoid/api/blob/master/sections/account.md)
 
-**`Fakturoid.Subject`**
+<code>Fakturoid.<b>Subject</b></code>
 
 [github.com/fakturoid/api/sections/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md)
 
-**`Fakturoid.Invoice`
-`Fakturoid.InvoiceLine`**
+<code>Fakturoid.<b>Invoice</b>
+Fakturoid.<b>InvoiceLine</b></code>
 
 [github.com/fakturoid/api/sections/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md)
 
-**`Fakturoid.Generator`**
+<code>Fakturoid.<b>Generator</b></code>
 
 [github.com/fakturoid/api/sections/generator.md](https://github.com/fakturoid/api/blob/master/sections/generator.md)
 
