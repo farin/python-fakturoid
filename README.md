@@ -5,8 +5,6 @@ The Python interface to online accounting service [Fakturoid](http://fakturoid.c
 This library is developed and maintained by Roman Krejcik ([farin@farin.cz](mailto:farin@farin.cz)).
 It is unoficial and no support from Fakturoid team can be claimed.
 
-**Full API is not implmented yet. python-fakturoid is under active development and must be consider unstable yet.**
-
 ## Installation
 
     python setup.py install
@@ -124,8 +122,8 @@ Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and
 
 [github.com/fakturoid/api/sections/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md)
 
-<code>Fakturoid.<b>Invoice</b>
-Fakturoid.<b>InvoiceLine</b></code>
+<code>Fakturoid.<b>Invoice</b></code><br>
+<code>Fakturoid.<b>InvoiceLine</b></code>
 
 [github.com/fakturoid/api/sections/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md)
 
