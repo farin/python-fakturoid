@@ -99,14 +99,14 @@ Use `recurring=False`/`True` parameter to load recurring or simple templates onl
 
 <code>Fakturoid.<b>save(model)</b></code>
 
-Create or modify `Subject` or `Invoice`.
+Create or modify `Subject`, `Invoice` or `Generator`.
 
 Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes
 can be updated and `lines` property is ignored during save.
 
 <code>Fakturoid.<b>delete(model)</b></code>
 
-Delete `Subject` or `Invoice`.
+Delete `Subject`, `Invoice` or `Generator`.
 
 ### Models
 
