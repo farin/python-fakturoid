@@ -7,7 +7,14 @@ It is unoficial and no support from Fakturoid team can be claimed.
 
 ## Installation
 
-    python setup.py install
+Install from PyPI 
+
+    pip install fakturoid
+    
+or alternatively install development version directly from github
+
+    pip install -e git+git://github.com/farin/python-fakturoid#egg=fakturoid
+
 
 Supported Python versions are 2.6+ and 3.x. Dependencies are [requests](https://pypi.python.org/pypi/requests),
 [python-dateutil](https://pypi.python.org/pypi/python-dateutil/2.1)
