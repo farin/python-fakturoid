@@ -113,7 +113,10 @@ class Section(object):
     def unpack(self, model_type, endpoint, **kwargs):
         result = self.api._get(endpoint, **kwargs)
         if isinstance(result, list):
-            return map(lambda fields: model_type(**fields), result)
+            objects = []
+            for fields in result:
+                objects.append(model_type(**fields))
+            return objects
         else:
             return model_type(**result)
 
