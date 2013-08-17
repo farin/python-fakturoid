@@ -7,18 +7,30 @@ try:
 except ImportError:
     pass
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+# def read(fname):
+#     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+long_description = """
+fakturoid.cz Python API
+=======================
+
+The Python interface to online accounting service
+`Fakturoid <http://fakturoid.cz/>`_.
+
+See documentation on https://github.com/farin/python-fakturoid
+"""
 
 setup(
     name='fakturoid',
     version='0.9',
     url="https://github.com/farin/python-fakturoid",
     description='Python API for fakturoid.cz',
-    long_description=read('README.md'),
+    #long_description=read('README.md'),
+    long_description=long_description,
     author='Roman Krejcik',
     author_email='farin@farin.cz',
     license='MIT',
+    platforms='any',
     keywords=['fakturoid', 'accounting'],
     packages=['fakturoid'],
     install_requires=['requests', 'python-dateutil'],
