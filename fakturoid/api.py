@@ -137,7 +137,6 @@ class CrudSection(Section):
             result = self.api._post(self.endpoint, model.get_fields())
         model.update(result)
 
-
     def delete(self, model):
         id = self.extract_id(self.model_type, model)
         self.api._delete('{0}/{1}'.format(self.endpoint, id))
@@ -232,18 +231,8 @@ class GeneratorsApi(CrudSection):
         if recurring is None:
             endpoint = self.endpoint
         elif recurring:
-            # HACK API is broken, filter manually on client side
-            # endpoint = '{0}/recurring'.format(self.endpoint)
-            endpoint = self.endpoint
+            endpoint = '{0}/recurring'.format(self.endpoint)
         else:
             endpoint = '{0}/template'.format(self.endpoint)
 
-        generators = super(GeneratorsApi, self).find(params, endpoint)
-        # HACK see above
-        if recurring is True:
-            generators = filter(lambda g: g.recurring, generators)
-        # ENDHACK
-        return generators
-
-
-
+        return super(GeneratorsApi, self).find(params, endpoint)

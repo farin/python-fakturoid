@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='fakturoid',
-    version='0.1',
+    version='0.9',
     url="https://github.com/farin/python-fakturoid",
     description='Python API for fakturoid.cz',
     long_description=read('README.md'),
@@ -25,7 +25,7 @@ setup(
     tests_require=['mock'],
     test_suite="tests",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
