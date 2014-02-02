@@ -1,3 +1,4 @@
+import re
 import json
 from datetime import date, datetime
 
@@ -8,17 +9,21 @@ from fakturoid.paging import PagedResource
 
 __all__ = ['Fakturoid']
 
+link_header_pattern = re.compile('page=(\d+)>; rel="last"')
+
 
 class Fakturoid(object):
-    subdomain = None
+    """Fakturoid API v2 - http://docs.fakturoid.apiary.io/"""
+    slug = None
     api_key = None
     user_agent = 'python-fakturoid (https://github.com/farin/python-fakturoid)'
 
     _sections = None
 
-    def __init__(self, subdomain=None, api_key=None, user_agent=None):
-        self.subdomain = subdomain
+    def __init__(self, slug, email, api_key, user_agent=None):
+        self.slug = slug
         self.api_key = api_key
+        self.email = email
         self.user_agent = user_agent or self.user_agent
 
         self._sections = {
@@ -61,18 +66,29 @@ class Fakturoid(object):
             raise TypeError('delete is not supported for {0}'.format(type(obj).__name__))
         section.delete(obj)
 
+    def _extract_page_link(self, header):
+        m = link_header_pattern.search(header)
+        if m:
+            return int(m.group(1))
+        return None
+
     def _make_request(self, method, success_status, endpoint, **kwargs):
-        url = "https://{0}.fakturoid.cz/api/v1/{1}.json".format(self.subdomain, endpoint)
+        url = "https://app.fakturoid.cz/api/v2/accounts/{0}/{1}.json".format(self.slug, endpoint)
         headers = {'User-Agent': self.user_agent}
         headers.update(kwargs.pop('headers', {}))
-        r = getattr(requests, method)(url, auth=('', self.api_key), headers=headers, **kwargs)
+        r = getattr(requests, method)(url, auth=(self.email, self.api_key), headers=headers, **kwargs)
         try:
             json_result = r.json()
         except:
             json_result = None
 
         if r.status_code == success_status:
-            return json_result
+            response = {'json': json_result}
+            if 'link' in r.headers:
+                page_count = self._extract_page_link(r.headers['link'])
+                if page_count:
+                    response['page_count'] = page_count
+            return response
 
         if json_result and "errors" in json_result:
             raise ValueError(json_result["errors"])
@@ -98,9 +114,6 @@ class Section(object):
     def __init__(self, api):
         self.api = api
 
-    def __str__(self):
-        return str(self.get)
-
     def extract_id(self, model_type, value):
         if isinstance(value, int):
             return value
@@ -110,15 +123,15 @@ class Section(object):
             raise ValueError("object wit unassigned id")
         return value.id
 
-    def unpack(self, model_type, endpoint, **kwargs):
-        result = self.api._get(endpoint, **kwargs)
-        if isinstance(result, list):
+    def unpack(self, model_type, response):
+        raw = response['json']
+        if isinstance(raw, list):
             objects = []
-            for fields in result:
+            for fields in raw:
                 objects.append(model_type(**fields))
             return objects
         else:
-            return model_type(**result)
+            return model_type(**raw)
 
 
 class CrudSection(Section):
@@ -128,17 +141,19 @@ class CrudSection(Section):
     def load(self, id):
         if not isinstance(id, int):
             raise TypeError('id must be int')
-        return self.unpack(self.model_type, '{0}/{1}'.format(self.endpoint, id))
+        response = self.api._get('{0}/{1}'.format(self.endpoint, id))
+        return self.unpack(response, self.model_type)
 
     def find(self, params={}, endpoint=None):
-        return self.unpack(self.model_type, endpoint or self.endpoint, params=params)
+        response = self.api._get(endpoint or self.endpoint, params=params)
+        return self.unpack(self.model_type, response)
 
     def save(self, model):
         if model.id:
             result = self.api._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
         else:
             result = self.api._post(self.endpoint, model.get_fields())
-        model.update(result)
+        model.update(result['json'])
 
     def delete(self, model):
         id = self.extract_id(self.model_type, model)
@@ -146,14 +161,12 @@ class CrudSection(Section):
 
 
 class AccountApi(Section):
-    """API resource https://github.com/fakturoid/api/blob/master/sections/account.md"""
-
     def load(self):
-        return self.unpack(Account, 'account')
+        response = self.api._get('account')
+        return self.unpack(Account, response)
 
 
 class SubjectsApi(CrudSection):
-    """API resource https://github.com/fakturoid/api/blob/master/sections/subject.md"""
     model_type = Subject
     endpoint = 'subjects'
 
@@ -167,9 +180,7 @@ class SubjectsApi(CrudSection):
 
 
 class InvoicesApi(CrudSection):
-    """API https://github.com/fakturoid/api/blob/master/sections/invoice.md
-
-    If number argument is givent returs single Invoice object (or None), otherwise iterable list of invoices are returned.
+    """If number argument is givent returms single Invoice object (or None), otherwise iterable list of invoices are returned.
     """
     model_type = Invoice
     endpoint = 'invoices'
@@ -213,7 +224,10 @@ class InvoiceList(PagedResource):
     def load_page(self, n):
         params = {'page': n + 1}
         params.update(self.params)
-        return list(self.section_api.unpack(Invoice, self.endpoint, params=params))
+        #TODO make call from section api
+        response = self.section_api.api._get(self.endpoint, params=params)
+        #TODO use response['page_count']
+        return list(self.section_api.unpack(Invoice, response))
 
 
 class GeneratorsApi(CrudSection):

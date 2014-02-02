@@ -73,7 +73,7 @@ class Model(UnicodeMixin):
 
 
 class Account(Model):
-    """See https://github.com/fakturoid/api/blob/master/sections/account.md for complete field reference."""
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
     name = None
 
     class Meta:
@@ -87,7 +87,7 @@ class Account(Model):
 
 
 class Subject(Model):
-    """See https://github.com/fakturoid/api/blob/master/sections/subject.md for complete field reference."""
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
     name = None
 
     class Meta:
@@ -141,7 +141,7 @@ class AbstractInvoice(Model):
 
 
 class Invoice(AbstractInvoice):
-    """See https://github.com/fakturoid/api/blob/master/sections/invoice.md for complete field reference."""
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
     number = None
 
     class Meta:
@@ -156,7 +156,7 @@ class Invoice(AbstractInvoice):
 
 
 class Generator(AbstractInvoice):
-    """See https://github.com/fakturoid/api/blob/master/sections/generator.md for complete field reference."""
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
     name = None
 
     class Meta:

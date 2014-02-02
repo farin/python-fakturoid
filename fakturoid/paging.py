@@ -1,7 +1,7 @@
 class PagedResource:
     """List adapter for paged resources."""
     pages = {}
-    page_size = 10
+    page_size = 20
     known_page_out_of_bound = 1 << 31  # number larger than any real page
 
     def __init__(self, api, params=None):
