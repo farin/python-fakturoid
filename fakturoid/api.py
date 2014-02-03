@@ -142,7 +142,7 @@ class CrudSection(Section):
         if not isinstance(id, int):
             raise TypeError('id must be int')
         response = self.api._get('{0}/{1}'.format(self.endpoint, id))
-        return self.unpack(response, self.model_type)
+        return self.unpack(self.model_type, response)
 
     def find(self, params={}, endpoint=None):
         response = self.api._get(endpoint or self.endpoint, params=params)
@@ -222,11 +222,12 @@ class InvoiceList(PagedResource):
         self.params = params or {}
 
     def load_page(self, n):
-        params = {'page': n + 1}
+        params = {'page': n+1}
         params.update(self.params)
         #TODO make call from section api
         response = self.section_api.api._get(self.endpoint, params=params)
-        #TODO use response['page_count']
+        if self.page_count is None:
+            self.page_count = response.get('page_count', n+1)
         return list(self.section_api.unpack(Invoice, response))
 
 
