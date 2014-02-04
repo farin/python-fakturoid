@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 import requests
 
-from fakturoid.models import Account, Subject, Invoice, Generator
+from fakturoid.models import Model, Account, Subject, Invoice, Generator
 from fakturoid.paging import PagedResource
 
 __all__ = ['Fakturoid']
@@ -60,10 +60,27 @@ class Fakturoid(object):
             raise TypeError('save is not supported for {0}'.format(type(obj).__name__))
         section.save(obj)
 
-    def delete(self, obj):
-        section = self._sections.get(type(obj))
+    def delete(self, *args):
+        """Call with model object or model type and id.
+
+        s = fa.subject(1234)
+        fa.delete(s)
+
+        fa.delete(Subject, 1234)
+        """
+        if len(args) == 1:
+            model_type, obj = type(args[0]), args[0]
+        elif len(args) == 2:
+            model_type, obj = args
+        else:
+            raise ValueError('invalid number of arguments. Use delete(model) or delete(model_type, id)')
+
+        if not isinstance(model_type, type) or not issubclass(model_type, Model):
+            raise TypeError('{0} is not Fakturoid model or type'.format(model_type))
+
+        section = self._sections.get(model_type)
         if not section or not hasattr(section, 'delete'):
-            raise TypeError('delete is not supported for {0}'.format(type(obj).__name__))
+            raise TypeError('delete is not supported for {0}'.format(model_type.__name__))
         section.delete(obj)
 
     def _extract_page_link(self, header):

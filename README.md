@@ -7,10 +7,10 @@ It is unoficial and no support from Fakturoid team can be claimed.
 
 ## Installation
 
-Install from PyPI 
+Install from PyPI
 
     pip install fakturoid
-    
+
 or alternatively install development version directly from github
 
     pip install -e git+git://github.com/farin/python-fakturoid#egg=fakturoid
@@ -86,14 +86,9 @@ Returns `Invoice` instance.
 Use `proforma=False`/`True` parameter to load regular or proforma invoices only.
 
 Returns list of invoices. Invoices are lazily loaded according to slicing.
-Be careful with negative indexes. JSON API dosen't provide invoice count so
-all invoice pages must be iterate in such case.
 ```python
-fa.invoices()[99]   # loads 100th invoice,
-                    # read one invoice page
-
+fa.invoices(status='paid')[:100]   # loads 100 paid invoices
 fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from latest to first)
-                    # must read all invoice pages
 ```
 
 <code>Fakturoid.<b>generator(id)</b></code>
@@ -111,31 +106,39 @@ Create or modify `Subject`, `Invoice` or `Generator`.
 Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes
 can be updated and `lines` property is ignored during save.
 
-<code>Fakturoid.<b>delete(model)</b></code>
+<code>Fakturoid.<b>delete(model)</b></code><br>
+<code>Fakturoid.<b>delete(model_type, id)</b></code>
 
 Delete `Subject`, `Invoice` or `Generator`.
 
+```python
+subj = fa.subject(1234)
+fa.delete(subj)            # delete subject
+
+fa.delete(Subject, 1234)   # or alternativelly delete is possible without object loading
+```
+
 ### Models
 
-All models fields are named same as  [Fakturoid API](https://github.com/fakturoid/api).
+All models fields are named same as  [Fakturoid API](http://docs.fakturoid.apiary.io/).
 
 Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and `datetime.datetime` types.
 
 <code>Fakturoid.<b>Account</b></code>
 
-[github.com/fakturoid/api/sections/account.md](https://github.com/fakturoid/api/blob/master/sections/account.md)
+[http://docs.fakturoid.apiary.io/#account](http://docs.fakturoid.apiary.io/#account)
 
 <code>Fakturoid.<b>Subject</b></code>
 
-[github.com/fakturoid/api/sections/subject.md](https://github.com/fakturoid/api/blob/master/sections/subject.md)
+[http://docs.fakturoid.apiary.io/#subjects](http://docs.fakturoid.apiary.io/#subjects)
 
 <code>Fakturoid.<b>Invoice</b></code><br>
 <code>Fakturoid.<b>InvoiceLine</b></code>
 
-[github.com/fakturoid/api/sections/invoice.md](https://github.com/fakturoid/api/blob/master/sections/invoice.md)
+[http://docs.fakturoid.apiary.io/#invoices](http://docs.fakturoid.apiary.io/#invoices)
 
 <code>Fakturoid.<b>Generator</b></code>
 
-[github.com/fakturoid/api/sections/generator.md](https://github.com/fakturoid/api/blob/master/sections/generator.md)
+[http://docs.fakturoid.apiary.io/#generators](http://docs.fakturoid.apiary.io/#generators)
 
 Use `InvoiceLine` for generator lines

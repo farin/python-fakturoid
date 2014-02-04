@@ -5,7 +5,7 @@ import sys
 from decimal import Decimal
 from dateutil.parser import parse
 
-__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
+__all__ = ['Model', 'Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
 
 if sys.version_info[0] >= 3: # Python 3
     basestring = str
