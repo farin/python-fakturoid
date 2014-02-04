@@ -217,6 +217,7 @@ class InvoicesApi(CrudSection):
 class InvoiceList(PagedResource):
 
     def __init__(self, section_api, endpoint, params=None):
+        super(InvoiceList, self).__init__()
         self.section_api = section_api
         self.endpoint = endpoint
         self.params = params or {}

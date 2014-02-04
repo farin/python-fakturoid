@@ -1,14 +1,12 @@
 from itertools import islice
 
-class PagedResource:
+class PagedResource(object):
     """List adapter for paged resources. Returns sliceable lazy loaded object."""
-    pages = {}
-    page_size = 20
-    page_count = None
 
-    def __init__(self, api, params=None):
-        self.api = api
-        self.params = params or {}
+    def __init__(self, page_size=20):
+        self.pages = {}
+        self.page_size = page_size or 20
+        self.page_count = None
 
     def load_page(self, n):
         raise NotImplementedError("You must implement load_page method.")
