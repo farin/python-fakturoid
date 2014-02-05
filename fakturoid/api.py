@@ -1,16 +1,16 @@
 import re
 import json
 from datetime import date, datetime
+from functools import wraps
 
 import requests
 
-from fakturoid.models import Model, Account, Subject, Invoice, Generator
+from fakturoid.models import Account, Subject, Invoice, Generator
 from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
 
 link_header_pattern = re.compile('page=(\d+)>; rel="last"')
-
 
 class Fakturoid(object):
     """Fakturoid API v2 - http://docs.fakturoid.apiary.io/"""
@@ -33,54 +33,57 @@ class Fakturoid(object):
             Generator: GeneratorsApi(self),
         }
 
+    def model_api(model_type=None):
+        def wrap(fn):
+            @wraps(fn)
+            def wrapper(self, *args, **kwargs):
+                mt = model_type or type(args[0])
+                mapi = self._models_api.get(mt)
+                if not mapi:
+                    raise TypeError('model expected, got {0}'.format(mt.__name__))
+                return fn(self, mapi, *args, **kwargs)
+            return wrapper
+        return wrap
+
     def account(self):
         return self._models_api[Account].load()
 
-    def subject(self, id):
-        return self._models_api[Subject].load(id)
+    @model_api(Subject)
+    def subject(self, mapi, id):
+        return mapi.load(id)
 
-    def subjects(self, *args, **kwargs):
-        return self._models_api[Subject].find(*args, **kwargs)
+    @model_api(Subject)
+    def subjects(self, mapi, *args, **kwargs):
+        return mapi.find(*args, **kwargs)
 
-    def invoice(self, id):
-        return self._models_api[Invoice].load(id)
+    @model_api(Invoice)
+    def invoice(self, mapi, id):
+        return mapi.load(id)
 
-    def invoices(self, *args, **kwargs):
-        return self._models_api[Invoice].find(*args, **kwargs)
+    @model_api(Invoice)
+    def invoices(self, mapi, *args, **kwargs):
+        return mapi.find(*args, **kwargs)
 
-    def generator(self, id):
-        return self._models_api[Generator].load(id)
+    @model_api(Generator)
+    def generator(self, mapi, id):
+        return mapi.load(id)
 
-    def generators(self, *args, **kwargs):
-        return self._models_api[Generator].find(*args, **kwargs)
+    @model_api(Generator)
+    def generators(self, mapi, *args, **kwargs):
+        return mapi.find(*args, **kwargs)
 
-    def save(self, obj):
-        mapi = self._models_api.get(type(obj))
-        if not mapi or not hasattr(mapi, 'save'):
-            raise TypeError('save is not supported for {0}'.format(type(obj).__name__))
+    @model_api()
+    def save(self, mapi, obj):
         mapi.save(obj)
 
-    def delete(self, *args):
-        """Call with model object or model type and id.
-
+    @model_api()
+    def delete(self, mapi, obj):
+        """Call with loaded model or use new instance directly.
         s = fa.subject(1234)
-        fa.delete(s)
+        a.delete(s)
 
-        fa.delete(Subject, 1234)
+        fa.delete(Subject(id=1234))
         """
-        if len(args) == 1:
-            model_type, obj = type(args[0]), args[0]
-        elif len(args) == 2:
-            model_type, obj = args
-        else:
-            raise ValueError('invalid number of arguments. Use delete(model) or delete(model_type, id)')
-
-        if not isinstance(model_type, type) or not issubclass(model_type, Model):
-            raise TypeError('{0} is not Fakturoid model or type'.format(model_type))
-
-        mapi = self._models_api.get(model_type)
-        if not mapi or not hasattr(mapi, 'delete'):
-            raise TypeError('delete is not supported for {0}'.format(model_type.__name__))
         mapi.delete(obj)
 
     def _extract_page_link(self, header):
@@ -126,12 +129,12 @@ class Fakturoid(object):
 
 
 class ModelApi(object):
-    api = None
+    session = None
     model_type = None
     endpoint = None
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, session):
+        self.session = session
 
     def extract_id(self, value):
         if isinstance(value, int):
@@ -157,23 +160,23 @@ class CrudModelApi(ModelApi):
     def load(self, id):
         if not isinstance(id, int):
             raise TypeError('id must be int')
-        response = self.api._get('{0}/{1}'.format(self.endpoint, id))
+        response = self.session._get('{0}/{1}'.format(self.endpoint, id))
         return self.unpack(response)
 
     def find(self, params={}, endpoint=None):
-        response = self.api._get(endpoint or self.endpoint, params=params)
+        response = self.session._get(endpoint or self.endpoint, params=params)
         return self.unpack(response)
 
     def save(self, model):
         if model.id:
-            result = self.api._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
+            result = self.session._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
         else:
-            result = self.api._post(self.endpoint, model.get_fields())
+            result = self.session._post(self.endpoint, model.get_fields())
         model.update(result['json'])
 
     def delete(self, model):
         id = self.extract_id(self.model_type, model)
-        self.api._delete('{0}/{1}'.format(self.endpoint, id))
+        self.session._delete('{0}/{1}'.format(self.endpoint, id))
 
 
 class AccountApi(ModelApi):
@@ -181,7 +184,7 @@ class AccountApi(ModelApi):
     endpoint = 'account'
 
     def load(self):
-        response = self.api._get(self.endpoint)
+        response = self.session._get(self.endpoint)
         return self.unpack(response)
 
 
@@ -230,7 +233,7 @@ class InvoicesApi(CrudModelApi):
         else:
             endpoint = '{0}/regular'.format(self.endpoint)
 
-        return ModelList(Invoice, self, endpoint, params)
+        return ModelList(self, endpoint, params)
 
 
 class GeneratorsApi(CrudModelApi):

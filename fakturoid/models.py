@@ -1,28 +1,14 @@
 from __future__ import unicode_literals
 
-import sys
-
 from decimal import Decimal
 from dateutil.parser import parse
 
-__all__ = ['Model', 'Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
+from fakturoid import six
 
-if sys.version_info[0] >= 3: # Python 3
-    basestring = str
-
-
-class UnicodeMixin(object):
-  """Mixin class to handle defining the proper __str__/__unicode__
-  methods in Python 2 or 3."""
-  if sys.version_info[0] >= 3: # Python 3
-      def __str__(self):
-          return self.__unicode__()
-  else:  # Python 2
-      def __str__(self):
-          return self.__unicode__().encode('utf8')
+__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
 
 
-class Model(UnicodeMixin):
+class Model(six.UnicodeMixin):
     """Base class for all Fakturoid model objects"""
     id = None
 
@@ -34,7 +20,7 @@ class Model(UnicodeMixin):
 
     def update(self, fields):
         for field, value in fields.items():
-            if value and isinstance(value, basestring):
+            if value and isinstance(value, six.string_types):
                 if field.endswith('_at'):
                     fields[field] = parse(value)
                 elif field.endswith('_on') or field.endswith('_due') or field.endswith('_date'):

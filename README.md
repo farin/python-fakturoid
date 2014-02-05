@@ -107,7 +107,6 @@ Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice at
 can be updated and `lines` property is ignored during save.
 
 <code>Fakturoid.<b>delete(model)</b></code><br>
-<code>Fakturoid.<b>delete(model_type, id)</b></code>
 
 Delete `Subject`, `Invoice` or `Generator`.
 
@@ -115,7 +114,7 @@ Delete `Subject`, `Invoice` or `Generator`.
 subj = fa.subject(1234)
 fa.delete(subj)            # delete subject
 
-fa.delete(Subject, 1234)   # or alternativelly delete is possible without object loading
+fa.delete(Subject(id=1234))   # or alternativelly delete is possible without object loading
 ```
 
 ### Models
