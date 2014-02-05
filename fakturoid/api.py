@@ -5,7 +5,7 @@ from datetime import date, datetime
 import requests
 
 from fakturoid.models import Model, Account, Subject, Invoice, Generator
-from fakturoid.paging import PagedResource
+from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
 
@@ -18,7 +18,7 @@ class Fakturoid(object):
     api_key = None
     user_agent = 'python-fakturoid (https://github.com/farin/python-fakturoid)'
 
-    _sections = None
+    _models_api = None
 
     def __init__(self, slug, email, api_key, user_agent=None):
         self.slug = slug
@@ -26,7 +26,7 @@ class Fakturoid(object):
         self.email = email
         self.user_agent = user_agent or self.user_agent
 
-        self._sections = {
+        self._models_api = {
             Account: AccountApi(self),
             Subject: SubjectsApi(self),
             Invoice: InvoicesApi(self),
@@ -34,31 +34,31 @@ class Fakturoid(object):
         }
 
     def account(self):
-        return self._sections[Account].load()
+        return self._models_api[Account].load()
 
     def subject(self, id):
-        return self._sections[Subject].load(id)
+        return self._models_api[Subject].load(id)
 
     def subjects(self, *args, **kwargs):
-        return self._sections[Subject].find(*args, **kwargs)
+        return self._models_api[Subject].find(*args, **kwargs)
 
     def invoice(self, id):
-        return self._sections[Invoice].load(id)
+        return self._models_api[Invoice].load(id)
 
     def invoices(self, *args, **kwargs):
-        return self._sections[Invoice].find(*args, **kwargs)
+        return self._models_api[Invoice].find(*args, **kwargs)
 
     def generator(self, id):
-        return self._sections[Generator].load(id)
+        return self._models_api[Generator].load(id)
 
     def generators(self, *args, **kwargs):
-        return self._sections[Generator].find(*args, **kwargs)
+        return self._models_api[Generator].find(*args, **kwargs)
 
     def save(self, obj):
-        section = self._sections.get(type(obj))
-        if not section or not hasattr(section, 'save'):
+        mapi = self._models_api.get(type(obj))
+        if not mapi or not hasattr(mapi, 'save'):
             raise TypeError('save is not supported for {0}'.format(type(obj).__name__))
-        section.save(obj)
+        mapi.save(obj)
 
     def delete(self, *args):
         """Call with model object or model type and id.
@@ -78,10 +78,10 @@ class Fakturoid(object):
         if not isinstance(model_type, type) or not issubclass(model_type, Model):
             raise TypeError('{0} is not Fakturoid model or type'.format(model_type))
 
-        section = self._sections.get(model_type)
-        if not section or not hasattr(section, 'delete'):
+        mapi = self._models_api.get(model_type)
+        if not mapi or not hasattr(mapi, 'delete'):
             raise TypeError('delete is not supported for {0}'.format(model_type.__name__))
-        section.delete(obj)
+        mapi.delete(obj)
 
     def _extract_page_link(self, header):
         m = link_header_pattern.search(header)
@@ -125,45 +125,44 @@ class Fakturoid(object):
         return self._make_request('delete', 204, endpoint)
 
 
-class Section(object):
+class ModelApi(object):
     api = None
+    model_type = None
+    endpoint = None
 
     def __init__(self, api):
         self.api = api
 
-    def extract_id(self, model_type, value):
+    def extract_id(self, value):
         if isinstance(value, int):
             return value
-        if not isinstance(value, model_type):
-            raise TypeError("int or {0} expected".format(model_type.__name__.lower()))
+        if not isinstance(value, self.model_type):
+            raise TypeError("int or {0} expected".format(self.model_type.__name__.lower()))
         if not getattr(value, 'id', None):
             raise ValueError("object wit unassigned id")
         return value.id
 
-    def unpack(self, model_type, response):
+    def unpack(self, response):
         raw = response['json']
         if isinstance(raw, list):
             objects = []
             for fields in raw:
-                objects.append(model_type(**fields))
+                objects.append(self.model_type(**fields))
             return objects
         else:
-            return model_type(**raw)
+            return self.model_type(**raw)
 
 
-class CrudSection(Section):
-    model_type = None
-    endpoint = None
-
+class CrudModelApi(ModelApi):
     def load(self, id):
         if not isinstance(id, int):
             raise TypeError('id must be int')
         response = self.api._get('{0}/{1}'.format(self.endpoint, id))
-        return self.unpack(self.model_type, response)
+        return self.unpack(response)
 
     def find(self, params={}, endpoint=None):
         response = self.api._get(endpoint or self.endpoint, params=params)
-        return self.unpack(self.model_type, response)
+        return self.unpack(response)
 
     def save(self, model):
         if model.id:
@@ -177,13 +176,16 @@ class CrudSection(Section):
         self.api._delete('{0}/{1}'.format(self.endpoint, id))
 
 
-class AccountApi(Section):
+class AccountApi(ModelApi):
+    model_type = Account
+    endpoint = 'account'
+
     def load(self):
-        response = self.api._get('account')
-        return self.unpack(Account, response)
+        response = self.api._get(self.endpoint)
+        return self.unpack(response)
 
 
-class SubjectsApi(CrudSection):
+class SubjectsApi(CrudModelApi):
     model_type = Subject
     endpoint = 'subjects'
 
@@ -196,7 +198,7 @@ class SubjectsApi(CrudSection):
         return super(SubjectsApi, self).find(params)
 
 
-class InvoicesApi(CrudSection):
+class InvoicesApi(CrudModelApi):
     """If number argument is givent returms single Invoice object (or None), otherwise iterable list of invoices are returned.
     """
     model_type = Invoice
@@ -228,28 +230,10 @@ class InvoicesApi(CrudSection):
         else:
             endpoint = '{0}/regular'.format(self.endpoint)
 
-        return InvoiceList(self, endpoint, params)
+        return ModelList(Invoice, self, endpoint, params)
 
 
-class InvoiceList(PagedResource):
-
-    def __init__(self, section_api, endpoint, params=None):
-        super(InvoiceList, self).__init__()
-        self.section_api = section_api
-        self.endpoint = endpoint
-        self.params = params or {}
-
-    def load_page(self, n):
-        params = {'page': n+1}
-        params.update(self.params)
-        #TODO make call from section api
-        response = self.section_api.api._get(self.endpoint, params=params)
-        if self.page_count is None:
-            self.page_count = response.get('page_count', n+1)
-        return list(self.section_api.unpack(Invoice, response))
-
-
-class GeneratorsApi(CrudSection):
+class GeneratorsApi(CrudModelApi):
     model_type = Generator
     endpoint = 'generators'
 

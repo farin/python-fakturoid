@@ -1,5 +1,6 @@
 from itertools import islice
 
+
 class PagedResource(object):
     """List adapter for paged resources. Returns sliceable lazy loaded object."""
 
@@ -44,3 +45,20 @@ class PagedResource(object):
             return islice(self, *key.indices(len(self)))
         else:
             raise TypeError('list indices must be integers')
+
+
+class ModelList(PagedResource):
+
+    def __init__(self, section_api, endpoint, params=None):
+        super(ModelList, self).__init__()
+        self.section_api = section_api
+        self.endpoint = endpoint
+        self.params = params or {}
+
+    def load_page(self, n):
+        params = {'page': n+1}
+        params.update(self.params)
+        response = self.section_api.api._get(self.endpoint, params=params)
+        if self.page_count is None:
+            self.page_count = response.get('page_count', n+1)
+        return list(self.section_api.unpack(response))
