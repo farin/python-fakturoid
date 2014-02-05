@@ -77,7 +77,7 @@ class Subject(Model):
     name = None
 
     class Meta:
-        readonly = ['id', 'html_url', 'url', 'updated_at']
+        readonly = ['id', 'avatar_url', 'html_url', 'url', 'updated_at']
         decimal = []
 
     def __unicode__(self):
@@ -88,7 +88,7 @@ class InvoiceLine(Model):
     quantity = None
 
     class Meta:
-        readonly = []
+        readonly = [] #no id here, to correct update
         decimal = ['quantity', 'unit_price']
 
     def __init__(self, **kwargs):
@@ -118,10 +118,10 @@ class AbstractInvoice(Model):
         super(AbstractInvoice, self).update(fields)
 
     def is_field_writable(self, field, value):
-        if field == 'lines' and self.id:
-            #HACK API is not able to modify existing invoice/generators lines (it currently performs only append)
-            return False
-        if field.startswith('your_'):
+        # if field == 'lines' and self.id:
+        #     #HACK API is not able to modify existing invoice/generators lines (it currently performs only append)
+        #     return False
+        if field.startswith('your_') or field.startswith('client_'):
             return False
         return super(AbstractInvoice, self).is_field_writable(field, value)
 
@@ -131,9 +131,12 @@ class Invoice(AbstractInvoice):
     number = None
 
     class Meta:
-        readonly = ['id', 'html_url', 'url', 'updated_at', 'proforma', 'due_on', 'subtotal', 'total'
-            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount',
-            'reminder_sent_at', 'sent_at', 'subject_url']
+        readonly = ['id', 'token', 'status',  'due_on',
+            'sent_at', 'paid_at', 'reminder_sent_at', 'accepted_at', 'canceled_at',
+            'subtotal', 'native_subtotal', 'total', 'native_total',
+            'remaining_amount', 'remaining_native_amount',
+            'html_url', 'public_html_url', 'url', 'updated_at',
+            'subject_url']
         decimal = ['exchange_rate', 'subtotal', 'total',
             'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount']
 
@@ -146,8 +149,8 @@ class Generator(AbstractInvoice):
     name = None
 
     class Meta:
-        readonly = ['id', 'html_url', 'url', 'updated_at', 'subtotal', 'total'
-            'native_subtotal', 'native_total', 'subject_url']
+        readonly = ['id', 'subtotal', 'native_subtotal', 'total', 'native_total',
+            'html_url', 'url', 'subject_url', 'updated_at' ]
         decimal = ['exchange_rate', 'subtotal', 'total', 'native_subtotal', 'native_total']
 
     def __unicode__(self):
