@@ -115,7 +115,7 @@ class AbstractInvoice(Model):
             self._loaded_lines = []
             for line in fields.pop('lines'):
                 if not isinstance(line, InvoiceLine):
-                    if line['id']:
+                    if 'id' in line:
                          self._loaded_lines.append(line)
                     line = InvoiceLine(**line)
                 self.lines.append(line)
