@@ -147,3 +147,11 @@ Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and
 [http://docs.fakturoid.apiary.io/#generators](http://docs.fakturoid.apiary.io/#generators)
 
 Use `InvoiceLine` for generator lines
+
+### 0.9 upgrade note
+
+pyfakturoid 0.9 used v1 fakturoid API. Current v2 API additionally requires user email to authenticate.
+So `Fakturoid` constructor has extra email argument.
+
+Fakturoid v2 API supports invoice lines modification. So now everything works as you expect (lines can be
+updated or deleted) Verison 0.9 ignored all lines field when updating invoce. In current version all changes are saved.
