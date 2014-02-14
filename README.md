@@ -103,8 +103,14 @@ Use `recurring=False`/`True` parameter to load recurring or simple templates onl
 
 Create or modify `Subject`, `Invoice` or `Generator`.
 
-Fakturoid JSON API doesn't support modifying invoice lines. Only base invoice attributes
-can be updated and `lines` property is ignored during save.
+To modify or delete inoive lines simply edit `lines`
+
+```python
+invoice = fa.invoices(number='2014-0002')[0]
+invoice.lines[0].unit_price = 5000 # edit first item
+del invoice.lines[-1]  # delete last item
+fa.save(invoice)
+```
 
 <code>Fakturoid.<b>delete(model)</b></code><br>
 

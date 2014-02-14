@@ -22,7 +22,7 @@ See documentation on https://github.com/farin/python-fakturoid
 
 setup(
     name='fakturoid',
-    version='0.9',
+    version='1.0',
     url="https://github.com/farin/python-fakturoid",
     description='Python API for fakturoid.cz',
     #long_description=read('README.md'),
@@ -37,7 +37,7 @@ setup(
     tests_require=['mock'],
     test_suite="tests",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
