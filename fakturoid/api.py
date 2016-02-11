@@ -176,7 +176,7 @@ class CrudModelApi(ModelApi):
         model.update(result['json'])
 
     def delete(self, model):
-        id = self.extract_id(self.model_type, model)
+        id = self.extract_id(model)
         self.session._delete('{0}/{1}'.format(self.endpoint, id))
 
 
