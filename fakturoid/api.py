@@ -12,6 +12,7 @@ __all__ = ['Fakturoid']
 
 link_header_pattern = re.compile('page=(\d+)>; rel="last"')
 
+
 class Fakturoid(object):
     """Fakturoid API v2 - http://docs.fakturoid.apiary.io/"""
     slug = None
@@ -122,7 +123,7 @@ class Fakturoid(object):
         return self._make_request('post', 201, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
     def _put(self, endpoint, data):
-        return self._make_request('put', 200, endpoint,  headers={'Content-Type': 'application/json'}, data=json.dumps(data))
+        return self._make_request('put', 200, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
     def _delete(self, endpoint):
         return self._make_request('delete', 204, endpoint)
@@ -175,7 +176,7 @@ class CrudModelApi(ModelApi):
         model.update(result['json'])
 
     def delete(self, model):
-        id = self.extract_id(self.model_type, model)
+        id = self.extract_id(model)
         self.session._delete('{0}/{1}'.format(self.endpoint, id))
 
 
