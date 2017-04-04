@@ -5,7 +5,7 @@ from dateutil.parser import parse
 
 from fakturoid import six
 
-__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator']
+__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator', 'Message']
 
 
 class Model(six.UnicodeMixin):
@@ -166,3 +166,14 @@ class Generator(AbstractInvoice):
 
     def __unicode__(self):
         return self.name
+
+
+class Message(Model):
+    """See http://docs.fakturoid.apiary.io/#reference/messages for complete field reference."""
+    subject = None
+
+    class Meta:
+        decimal = []
+
+    def __unicode__(self):
+        return self.subject

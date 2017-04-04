@@ -5,7 +5,7 @@ from functools import wraps
 
 import requests
 
-from fakturoid.models import Account, Subject, Invoice, Generator
+from fakturoid.models import Account, Subject, Invoice, Generator, Message
 from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
@@ -32,6 +32,7 @@ class Fakturoid(object):
             Subject: SubjectsApi(self),
             Invoice: InvoicesApi(self),
             Generator: GeneratorsApi(self),
+            Message: MessagesApi(self),
         }
 
     def model_api(model_type=None):
@@ -74,8 +75,8 @@ class Fakturoid(object):
         return mapi.find(*args, **kwargs)
 
     @model_api()
-    def save(self, mapi, obj):
-        mapi.save(obj)
+    def save(self, mapi, obj, **kwargs):
+        mapi.save(obj, **kwargs)
 
     @model_api()
     def delete(self, mapi, obj):
@@ -168,7 +169,7 @@ class CrudModelApi(ModelApi):
         response = self.session._get(endpoint or self.endpoint, params=params)
         return self.unpack(response)
 
-    def save(self, model):
+    def save(self, model, **kwargs):
         if model.id:
             result = self.session._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
         else:
@@ -260,3 +261,15 @@ class GeneratorsApi(CrudModelApi):
             endpoint = '{0}/template'.format(self.endpoint)
 
         return super(GeneratorsApi, self).find(params, endpoint)
+
+
+class MessagesApi(ModelApi):
+    model_type = Message
+    endpoint = 'message'
+
+    def save(self, model, **kwargs):
+        invoice_id = kwargs.get('invoice_id')
+        if not isinstance(invoice_id, int):
+            raise TypeError("invoice_id must be int")
+        result = self.session._post('invoices/{0}/{1}'.format(invoice_id, self.endpoint), model.get_fields())
+        model.update(result['json'])
