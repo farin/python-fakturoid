@@ -169,7 +169,7 @@ class CrudModelApi(ModelApi):
         response = self.session._get(endpoint or self.endpoint, params=params)
         return self.unpack(response)
 
-    def save(self, model, **kwargs):
+    def save(self, model):
         if model.id:
             result = self.session._put('{0}/{1}'.format(self.endpoint, model.id), model.get_fields())
         else:
