@@ -210,7 +210,7 @@ class InvoicesApi(CrudModelApi):
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
 
-    def find(self, proforma=None, subject_id=None, since=None, number=None, status=None):
+    def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None):
         params = {}
         if subject_id:
             if not isinstance(subject_id, int):
@@ -220,6 +220,10 @@ class InvoicesApi(CrudModelApi):
             if not isinstance(since, (datetime, date)):
                 raise TypeError("'since' parameter must be date or datetime")
             params['since'] = since.isoformat()
+        if updated_since:
+            if not isinstance(since, (datetime, date)):
+                raise TypeError("'since' parameter must be date or datetime")
+            params['updated_since'] = updated_since.isoformat()
         if number:
             params['number'] = number
         if status:
