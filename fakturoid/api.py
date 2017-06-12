@@ -221,8 +221,8 @@ class InvoicesApi(CrudModelApi):
                 raise TypeError("'since' parameter must be date or datetime")
             params['since'] = since.isoformat()
         if updated_since:
-            if not isinstance(since, (datetime, date)):
-                raise TypeError("'since' parameter must be date or datetime")
+            if not isinstance(updated_since, (datetime, date)):
+                raise TypeError("'updated_since' parameter must be date or datetime")
             params['updated_since'] = updated_since.isoformat()
         if number:
             params['number'] = number
