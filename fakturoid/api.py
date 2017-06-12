@@ -10,7 +10,7 @@ from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
 
-link_header_pattern = re.compile('page=(\d+)>; rel="last"')
+link_header_pattern = re.compile(r'page=(\d+)[^>]*>; rel="last"')
 
 
 class Fakturoid(object):
