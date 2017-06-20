@@ -66,6 +66,10 @@ class Fakturoid(object):
     def invoices(self, mapi, *args, **kwargs):
         return mapi.find(*args, **kwargs)
 
+    @model_api(Invoice)
+    def fire_invoice_event(self, mapi, id, event):
+        return mapi.fire(id, event)
+
     @model_api(Generator)
     def generator(self, mapi, id):
         return mapi.load(id)
@@ -120,8 +124,8 @@ class Fakturoid(object):
     def _get(self, endpoint, params=None):
         return self._make_request('get', 200, endpoint, params=params)
 
-    def _post(self, endpoint, data):
-        return self._make_request('post', 201, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
+    def _post(self, endpoint, data, params=None):
+        return self._make_request('post', 201, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data), params=params)
 
     def _put(self, endpoint, data):
         return self._make_request('put', 200, endpoint, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
@@ -210,6 +214,16 @@ class InvoicesApi(CrudModelApi):
     endpoint = 'invoices'
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
+    EVENTS = ['mark_as_sent', 'deliver', 'pay', 'pay_proforma', 'pay_partial_proforma', 'remove_payment', 'deliver_reminder']
+
+    def fire(self, invoice_id, event):
+        if not isinstance(invoice_id, int):
+            raise TypeError('invoice_id must be int')
+        if event not in self.EVENTS:
+            raise ValueError('invalid event, expected one of {0}'.format(', '.join(self.EVENTS)))
+
+        result = self.session._post('invoices/{0}/fire'.format(invoice_id), {}, params={'event': event})
+        result
 
     def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None):
         params = {}

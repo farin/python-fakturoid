@@ -13,6 +13,9 @@ class FakeResponse(object):
 	def json(self):
 		return json.loads(self.text)
 
+	def raise_for_status(self):
+		pass
+
 
 def response(name):
 	content = open(os.path.join(os.path.dirname(__file__), 'responses', name)).read()
