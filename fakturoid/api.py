@@ -211,7 +211,7 @@ class InvoicesApi(CrudModelApi):
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
 
-    def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None):
+    def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None, custom_id=None):
         params = {}
         if subject_id:
             if not isinstance(subject_id, int):
@@ -227,6 +227,8 @@ class InvoicesApi(CrudModelApi):
             params['updated_since'] = updated_since.isoformat()
         if number:
             params['number'] = number
+        if custom_id:
+            params['custom_id'] = custom_id
         if status:
             if status not in self.STATUSES:
                 raise ValueError('invalid invoice status, expected one of {0}'.format(', '.join(self.STATUSES)))
