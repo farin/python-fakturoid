@@ -131,27 +131,23 @@ Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and
 
 <code>Fakturoid.<b>Account</b></code>
 
-[http://docs.fakturoid.apiary.io/#account](http://docs.fakturoid.apiary.io/#account)
+[http://docs.fakturoid.apiary.io/#reference/account](http://docs.fakturoid.apiary.io/#reference/account)
 
 <code>Fakturoid.<b>Subject</b></code>
 
-[http://docs.fakturoid.apiary.io/#subjects](http://docs.fakturoid.apiary.io/#subjects)
+[http://docs.fakturoid.apiary.io/#reference/subjects](http://docs.fakturoid.apiary.io/#reference/subjects)
 
 <code>Fakturoid.<b>Invoice</b></code><br>
 <code>Fakturoid.<b>InvoiceLine</b></code>
 
-[http://docs.fakturoid.apiary.io/#invoices](http://docs.fakturoid.apiary.io/#invoices)
+[http://docs.fakturoid.apiary.io/#reference/invoices](http://docs.fakturoid.apiary.io/#reference/invoices)
 
 <code>Fakturoid.<b>Generator</b></code>
 
-[http://docs.fakturoid.apiary.io/#generators](http://docs.fakturoid.apiary.io/#generators)
+[http://docs.fakturoid.apiary.io/#reference/generators](http://docs.fakturoid.apiary.io/#reference/generators)
 
 Use `InvoiceLine` for generator lines
 
-### 0.9 upgrade note
+<code>Fakturoid.<b>Message</b></code>
 
-pyfakturoid 0.9 used v1 fakturoid API. Current v2 API additionally requires user email to authenticate.
-So `Fakturoid` constructor has extra email argument.
-
-Fakturoid v2 API supports invoice lines modification. So now everything works as you expect (lines can be
-updated or deleted) Verison 0.9 ignored all lines field when updating invoce. In current version all changes are saved.
+[http://docs.fakturoid.apiary.io/#reference/messages](http://docs.fakturoid.apiary.io/#reference/messages)
