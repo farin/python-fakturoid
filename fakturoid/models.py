@@ -88,7 +88,7 @@ class InvoiceLine(Model):
     quantity = None
 
     class Meta:
-        readonly = [] #no id here, to correct update
+        readonly = []  # no id here, to correct update
         decimal = ['quantity', 'unit_price']
 
     def __init__(self, **kwargs):
@@ -107,7 +107,7 @@ class InvoiceLine(Model):
 
 class AbstractInvoice(Model):
     lines = []
-    _loaded_lines = [] #keep loaded data to be able delete removed lines
+    _loaded_lines = []  # keep loaded data to be able delete removed lines
 
     def update(self, fields):
         if 'lines' in fields:
@@ -116,13 +116,13 @@ class AbstractInvoice(Model):
             for line in fields.pop('lines'):
                 if not isinstance(line, InvoiceLine):
                     if 'id' in line:
-                         self._loaded_lines.append(line)
+                        self._loaded_lines.append(line)
                     line = InvoiceLine(**line)
                 self.lines.append(line)
         super(AbstractInvoice, self).update(fields)
 
     def serialize_field_value(self, field, value):
-        result = super(AbstractInvoice, self).serialize_field_value(field, value);
+        result = super(AbstractInvoice, self).serialize_field_value(field, value)
         if field == 'lines':
             ids = map(lambda l: l.get('id'), result)
             for remote in self._loaded_lines:
@@ -142,14 +142,19 @@ class Invoice(AbstractInvoice):
     number = None
 
     class Meta:
-        readonly = ['id', 'token', 'status',  'due_on',
+        readonly = [
+            'id', 'token', 'status', 'due_on',
             'sent_at', 'paid_at', 'reminder_sent_at', 'accepted_at', 'canceled_at',
             'subtotal', 'native_subtotal', 'total', 'native_total',
             'remaining_amount', 'remaining_native_amount',
             'html_url', 'public_html_url', 'url', 'updated_at',
-            'subject_url']
-        decimal = ['exchange_rate', 'subtotal', 'total',
-            'native_subtotal', 'native_total', 'remaining_amount', 'remaining_native_amount']
+            'subject_url'
+        ]
+        decimal = [
+            'exchange_rate', 'subtotal', 'total',
+            'native_subtotal', 'native_total', 'remaining_amount',
+            'remaining_native_amount'
+        ]
 
     def __unicode__(self):
         return self.number
@@ -160,8 +165,10 @@ class Generator(AbstractInvoice):
     name = None
 
     class Meta:
-        readonly = ['id', 'subtotal', 'native_subtotal', 'total', 'native_total',
-            'html_url', 'url', 'subject_url', 'updated_at' ]
+        readonly = [
+            'id', 'subtotal', 'native_subtotal', 'total', 'native_total',
+            'html_url', 'url', 'subject_url', 'updated_at'
+        ]
         decimal = ['exchange_rate', 'subtotal', 'total', 'native_subtotal', 'native_total']
 
     def __unicode__(self):
