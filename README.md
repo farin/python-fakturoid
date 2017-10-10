@@ -91,6 +91,10 @@ fa.invoices(status='paid')[:100]   # loads 100 paid invoices
 fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from latest to first)
 ```
 
+<code>Fakturoid.<b>fire_invoice_event(id, event)</b></code>
+
+Fires basic events on invoice. All events are described in [Fakturoid API docs](http://docs.fakturoid.apiary.io/#reference/invoices/invoice-actions/akce-nad-fakturou).
+
 <code>Fakturoid.<b>generator(id)</b></code>
 
 Returns `Generator` instance.
