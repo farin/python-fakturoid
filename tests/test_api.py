@@ -6,7 +6,7 @@ from mock import patch
 
 from fakturoid import Fakturoid
 
-from tests.mock import response
+from tests.mock import response, FakeResponse
 
 
 class FakturoidTestCase(unittest.TestCase):
@@ -54,6 +54,17 @@ class InvoiceTestCase(FakturoidTestCase):
 
         self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices/9.json', mock.call_args[0][0])
         self.assertEquals('2012-0004', invoice.number)
+
+    @patch('requests.post', return_value=FakeResponse(''))
+    def test_load(self, mock):
+        invoice = self.fa.fire_invoice_event(9, 'pay')
+
+        mock.assert_called_once_with('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices/9/fire.json',
+                                     auth=('9ACA7', 'Test App'),
+                                     data='{}',
+                                     headers={'User-Agent': 'python-fakturoid (https://github.com/farin/python-fakturoid)', 'Content-Type': 'application/json'},
+                                     params={'event': 'pay'})
+
 
     @patch('requests.get', return_value=response('invoices.json'))
     def test_find(self, mock):
