@@ -67,8 +67,8 @@ class Fakturoid(object):
         return mapi.find(*args, **kwargs)
 
     @model_api(Invoice)
-    def fire_invoice_event(self, mapi, id, event):
-        return mapi.fire(id, event)
+    def fire_invoice_event(self, mapi, id, event, **kwargs):
+        return mapi.fire(id, event, **kwargs)
 
     @model_api(Generator)
     def generator(self, mapi, id):
@@ -208,21 +208,38 @@ class SubjectsApi(CrudModelApi):
 
 
 class InvoicesApi(CrudModelApi):
-    """If number argument is givent returms single Invoice object (or None), otherwise iterable list of invoices are returned.
+    """If number argument is givent returms single Invoice object (or None),
+    otherwise iterable list of invoices are returned.
     """
     model_type = Invoice
     endpoint = 'invoices'
 
     STATUSES = ['open', 'sent', 'overdue', 'paid', 'cancelled']
     EVENTS = ['mark_as_sent', 'deliver', 'pay', 'pay_proforma', 'pay_partial_proforma', 'remove_payment', 'deliver_reminder', 'cancel', 'undo_cancel']
+    EVENT_ARGS = {
+        'pay': {'paid_at', 'paid_amount'}
+    }
 
-    def fire(self, invoice_id, event):
+    def fire(self, invoice_id, event, **kwargs):
         if not isinstance(invoice_id, int):
             raise TypeError('invoice_id must be int')
         if event not in self.EVENTS:
             raise ValueError('invalid event, expected one of {0}'.format(', '.join(self.EVENTS)))
 
-        self.session._post('invoices/{0}/fire'.format(invoice_id), {}, params={'event': event})
+        allowed_args = self.EVENT_ARGS.get(event, {})
+        if (set(kwargs.keys()) - allowed_args):
+            msg = "invalid event arguments, only {0} can be used with {1}".format(', '.join(allowed_args), event)
+            raise ValueError(msg)
+
+        params = {'event': event}
+        params.update(kwargs)
+
+        if 'paid_at' in params:
+            if not isinstance(params['paid_at'], date):
+                raise TypeError("'paid_at' argument must be date")
+            params['paid_at'] = params['paid_at'].isoformat()
+
+        self.session._post('invoices/{0}/fire'.format(invoice_id), {}, params=params)
 
     def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None, custom_id=None):
         params = {}

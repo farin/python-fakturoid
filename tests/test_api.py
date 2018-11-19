@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import unittest
+from datetime import date
 from mock import patch
 
 from fakturoid import Fakturoid
@@ -63,6 +64,16 @@ class InvoiceTestCase(FakturoidTestCase):
                                      data='{}',
                                      headers={'User-Agent': 'python-fakturoid (https://github.com/farin/python-fakturoid)', 'Content-Type': 'application/json'},
                                      params={'event': 'pay'})
+
+    @patch('requests.post', return_value=FakeResponse(''))
+    def test_fire_with_args(self, mock):
+        self.fa.fire_invoice_event(9, 'pay', paid_at=date(2018, 11, 19))
+
+        mock.assert_called_once_with('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices/9/fire.json',
+                                     auth=('9ACA7', 'Test App'),
+                                     data='{}',
+                                     headers={'User-Agent': 'python-fakturoid (https://github.com/farin/python-fakturoid)', 'Content-Type': 'application/json'},
+                                     params={'event': 'pay', 'paid_at': '2018-11-19'})
 
     @patch('requests.get', return_value=response('invoices.json'))
     def test_find(self, mock):
