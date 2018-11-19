@@ -105,7 +105,7 @@ class Fakturoid(object):
         r = getattr(requests, method)(url, auth=(self.email, self.api_key), headers=headers, **kwargs)
         try:
             json_result = r.json()
-        except:
+        except Exception:
             json_result = None
 
         if r.status_code == success_status:
@@ -222,8 +222,7 @@ class InvoicesApi(CrudModelApi):
         if event not in self.EVENTS:
             raise ValueError('invalid event, expected one of {0}'.format(', '.join(self.EVENTS)))
 
-        result = self.session._post('invoices/{0}/fire'.format(invoice_id), {}, params={'event': event})
-        result
+        self.session._post('invoices/{0}/fire'.format(invoice_id), {}, params={'event': event})
 
     def find(self, proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None, custom_id=None):
         params = {}
