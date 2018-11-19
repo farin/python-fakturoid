@@ -91,9 +91,14 @@ fa.invoices(status='paid')[:100]   # loads 100 paid invoices
 fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from latest to first)
 ```
 
-<code>Fakturoid.<b>fire_invoice_event(id, event)</b></code>
+<code>Fakturoid.<b>fire_invoice_event(id, event, **args)</b></code>
 
 Fires basic events on invoice. All events are described in [Fakturoid API docs](http://docs.fakturoid.apiary.io/#reference/invoices/invoice-actions/akce-nad-fakturou).
+
+Pay event can accept optional arguments `paid_at` and `paid_amount`
+```python
+fa.fire_invoice_event(11331402, 'pay', paid_at=date(2018, 11, 17), paid_amount=2000)
+```
 
 <code>Fakturoid.<b>generator(id)</b></code>
 
