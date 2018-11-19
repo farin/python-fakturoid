@@ -21,9 +21,9 @@ class AccountTestCase(FakturoidTestCase):
     def test_load(self, mock):
         account = self.fa.account()
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/account.json', mock.call_args[0][0])
-        self.assertEquals("Alexandr Hejsek", account.name)
-        self.assertEquals("testdph@test.cz", account.email)
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/account.json', mock.call_args[0][0])
+        self.assertEqual("Alexandr Hejsek", account.name)
+        self.assertEqual("testdph@test.cz", account.email)
 
 
 class SubjectTestCase(FakturoidTestCase):
@@ -32,18 +32,18 @@ class SubjectTestCase(FakturoidTestCase):
     def test_load(self, mock):
         subject = self.fa.subject(28)
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/subjects/28.json', mock.call_args[0][0])
-        self.assertEquals(28, subject.id)
-        self.assertEquals('47123737', subject.registration_no)
-        self.assertEquals('2012-06-02T09:34:47+02:00', subject.updated_at.isoformat())
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/subjects/28.json', mock.call_args[0][0])
+        self.assertEqual(28, subject.id)
+        self.assertEqual('47123737', subject.registration_no)
+        self.assertEqual('2012-06-02T09:34:47+02:00', subject.updated_at.isoformat())
 
     @patch('requests.get', return_value=response('subjects.json'))
     def test_find(self, mock):
         subjects = self.fa.subjects()
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/subjects.json', mock.call_args[0][0])
-        self.assertEquals(2, len(subjects))
-        self.assertEquals('Apple Czech s.r.o.', subjects[0].name)
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/subjects.json', mock.call_args[0][0])
+        self.assertEqual(2, len(subjects))
+        self.assertEqual('Apple Czech s.r.o.', subjects[0].name)
 
 
 class InvoiceTestCase(FakturoidTestCase):
@@ -52,8 +52,8 @@ class InvoiceTestCase(FakturoidTestCase):
     def test_load(self, mock):
         invoice = self.fa.invoice(9)
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices/9.json', mock.call_args[0][0])
-        self.assertEquals('2012-0004', invoice.number)
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices/9.json', mock.call_args[0][0])
+        self.assertEqual('2012-0004', invoice.number)
 
     @patch('requests.post', return_value=FakeResponse(''))
     def test_fire(self, mock):
@@ -79,7 +79,7 @@ class InvoiceTestCase(FakturoidTestCase):
     def test_find(self, mock):
         self.fa.invoices()[:10]
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices.json', mock.call_args[0][0])
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/invoices.json', mock.call_args[0][0])
         # TODO paging test
 
 
@@ -89,15 +89,15 @@ class GeneratorTestCase(FakturoidTestCase):
     def test_load(self, mock):
         g = self.fa.generator(4)
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/generators/4.json', mock.call_args[0][0])
-        self.assertEquals('Podpora', g.name)
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/generators/4.json', mock.call_args[0][0])
+        self.assertEqual('Podpora', g.name)
 
     @patch('requests.get', return_value=response('generators.json'))
     def test_find(self, mock):
         generators = self.fa.generators()
 
-        self.assertEquals('https://app.fakturoid.cz/api/v2/accounts/myslug/generators.json', mock.call_args[0][0])
-        self.assertEquals(2, len(generators))
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/generators.json', mock.call_args[0][0])
+        self.assertEqual(2, len(generators))
 
 
 if __name__ == '__main__':
