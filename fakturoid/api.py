@@ -226,8 +226,8 @@ class InvoicesApi(CrudModelApi):
         if event not in self.EVENTS:
             raise ValueError('invalid event, expected one of {0}'.format(', '.join(self.EVENTS)))
 
-        allowed_args = self.EVENT_ARGS.get(event, {})
-        if (set(kwargs.keys()) - allowed_args):
+        allowed_args = self.EVENT_ARGS.get(event, set())
+        if not set(kwargs.keys()).issubset(allowed_args):
             msg = "invalid event arguments, only {0} can be used with {1}".format(', '.join(allowed_args), event)
             raise ValueError(msg)
 
