@@ -198,12 +198,14 @@ class SubjectsApi(CrudModelApi):
     model_type = Subject
     endpoint = 'subjects'
 
-    def find(self, since=None):
+    def find(self, since=None, custom_id=None):
         params = {}
         if since:
             if not isinstance(since, (datetime, date)):
                 raise TypeError("'since' parameter must be date or datetime")
             params['since'] = since.isoformat()
+        if custom_id:
+            params['custom_id'] = custom_id
         return super(SubjectsApi, self).find(params)
 
 
