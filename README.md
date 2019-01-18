@@ -75,8 +75,12 @@ Returns `Subject` instance.
 
 <code>Fakturoid.<b>subjects(since=None, updated_since=None, custom_id=None)</b></code>
 
-Loads all subjects.
-If since (`date` or `datetime`) paramter is passed, returns only subjects created since given date.
+Loads all subjects filtered by args.
+If since (`date` or `datetime`) parameter is passed, returns only subjects created since given date.
+
+<code>Fakturoid.<b>subjects(query="General Motors")</b></code>
+
+Perform full text search on subjects
 
 <code>Fakturoid.<b>invoce(id)</b></code>
 

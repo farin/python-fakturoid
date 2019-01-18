@@ -56,7 +56,10 @@ class Fakturoid(object):
 
     @model_api(Subject)
     def subjects(self, mapi, *args, **kwargs):
-        return mapi.find(*args, **kwargs)
+        if 'query' in kwargs:
+            return mapi.search(*args, **kwargs)
+        else:
+            return mapi.find(*args, **kwargs)
 
     @model_api(Invoice)
     def invoice(self, mapi, id):
@@ -211,6 +214,15 @@ class SubjectsApi(CrudModelApi):
         if custom_id:
             params['custom_id'] = custom_id
         return super(SubjectsApi, self).find(params)
+
+    def search(self, query):
+        """Full text search as described in
+        https://fakturoid.docs.apiary.io/#reference/subjects/subjects-collection-fulltext-search/fulltextove-vyhledavani-v-kontaktech
+        """
+        if not isinstance(query, str):
+            raise TypeError("'query' parameter must be str")
+        response = self.session._get('subjects/search'.format(self.endpoint), {'query': query})
+        return self.unpack(response)
 
 
 class InvoicesApi(CrudModelApi):
