@@ -73,15 +73,16 @@ Returns `Account` instance. Account is readonly and can't be updated by API.
 
 Returns `Subject` instance.
 
-<code>Fakturoid.<b>subjects(since=None)</b></code>
+<code>Fakturoid.<b>subjects(since=None, updated_since=None, custom_id=None)</b></code>
 
-Loads all subjects. If since (`date` or `datetime`) paramter is passed, retuns only subjects created since given date.
+Loads all subjects.
+If since (`date` or `datetime`) paramter is passed, returns only subjects created since given date.
 
 <code>Fakturoid.<b>invoce(id)</b></code>
 
 Returns `Invoice` instance.
 
-<code>Fakturoid.<b>invoices(proforma=None, subject_id=None, since=None, number=None, status=None)</b></code>
+<code>Fakturoid.<b>invoices(proforma=None, subject_id=None, since=None, updated_since=None, number=None, status=None, custom_id=None)</b></code>
 
 Use `proforma=False`/`True` parameter to load regular or proforma invoices only.
 
