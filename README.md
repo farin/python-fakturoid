@@ -78,7 +78,7 @@ Returns `Subject` instance.
 Loads all subjects filtered by args.
 If since (`date` or `datetime`) parameter is passed, returns only subjects created since given date.
 
-<code>Fakturoid.<b>subjects(query="General Motors")</b></code>
+<code>Fakturoid.<b>subjects.search("General Motors")</b></code>
 
 Perform full text search on subjects
 

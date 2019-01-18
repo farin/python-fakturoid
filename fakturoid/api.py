@@ -35,6 +35,19 @@ class Fakturoid(object):
             Message: MessagesApi(self),
         }
 
+        # Hack to expose full seach on subjects as
+        #
+        #     fa.subjects.search()
+        #
+        # TODO Keep this API but make internal code redesing in future.
+        def subjects_find(*args, **kwargs):
+            return self._subjects_find(*args, *kwargs)
+
+        def subjects_search(*args, **kwargs):
+            return self._subjects_search(*args, *kwargs)
+        self.subjects = subjects_find
+        self.subjects.search = subjects_search
+
     def model_api(model_type=None):
         def wrap(fn):
             @wraps(fn)
@@ -55,11 +68,14 @@ class Fakturoid(object):
         return mapi.load(id)
 
     @model_api(Subject)
-    def subjects(self, mapi, *args, **kwargs):
-        if 'query' in kwargs:
-            return mapi.search(*args, **kwargs)
-        else:
-            return mapi.find(*args, **kwargs)
+    def _subjects_find(self, mapi, *args, **kwargs):
+        """call using fa.subjects()"""
+        return mapi.find(*args, **kwargs)
+
+    @model_api(Subject)
+    def _subjects_search(self, mapi, *args, **kwargs):
+        """call using fa.subjects.search()"""
+        return mapi.search(*args, **kwargs)
 
     @model_api(Invoice)
     def invoice(self, mapi, id):
