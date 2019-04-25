@@ -22,7 +22,7 @@ See documentation on https://github.com/farin/python-fakturoid
 
 setup(
     name='fakturoid',
-    version='1.5',
+    version='1.5.1',
     url="https://github.com/farin/python-fakturoid",
     description='Python API for fakturoid.cz',
     # long_description=read('README.md'),
