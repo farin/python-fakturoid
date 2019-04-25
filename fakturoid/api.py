@@ -41,10 +41,10 @@ class Fakturoid(object):
         #
         # TODO Keep this API but make internal code redesing in future.
         def subjects_find(*args, **kwargs):
-            return self._subjects_find(*args, *kwargs)
+            return self._subjects_find(*args, **kwargs)
 
         def subjects_search(*args, **kwargs):
-            return self._subjects_search(*args, *kwargs)
+            return self._subjects_search(*args, **kwargs)
         self.subjects = subjects_find
         self.subjects.search = subjects_search
 
