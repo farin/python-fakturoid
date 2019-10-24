@@ -72,6 +72,20 @@ class Account(Model):
         return "<{0}:{1}>".format(self.__class__.__name__, self.name)
 
 
+class BankAccount(Model):
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
+    name = None
+
+    class Meta:
+        decimal = []
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return "<{0}:{1}>".format(self.__class__.__name__, self.name)
+
+
 class Subject(Model):
     """See http://docs.fakturoid.apiary.io/ for complete field reference."""
     name = None
