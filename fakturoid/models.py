@@ -5,7 +5,7 @@ from dateutil.parser import parse
 
 from fakturoid import six
 
-__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator', 'Message']
+__all__ = ['Account', 'BankAccount', 'Subject', 'InvoiceLine', 'Invoice', 'Generator', 'Message']
 
 
 class Model(six.UnicodeMixin):
