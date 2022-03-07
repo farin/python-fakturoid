@@ -5,7 +5,7 @@ from functools import wraps
 
 import requests
 
-from fakturoid.models import Account, Subject, Invoice, Generator, Message
+from fakturoid.models import Account, Subject, Invoice, Generator, Message, Expense
 from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
@@ -31,6 +31,7 @@ class Fakturoid(object):
             Account: AccountApi(self),
             Subject: SubjectsApi(self),
             Invoice: InvoicesApi(self),
+            Expense: ExpensesApi(self),
             Generator: GeneratorsApi(self),
             Message: MessagesApi(self),
         }
@@ -87,6 +88,18 @@ class Fakturoid(object):
 
     @model_api(Invoice)
     def fire_invoice_event(self, mapi, id, event, **kwargs):
+        return mapi.fire(id, event, **kwargs)
+
+    @model_api(Expense)
+    def expense(self, mapi, id):
+        return mapi.load(id)
+
+    @model_api(Expense)
+    def expenses(self, mapi, *args, **kwargs):
+        return mapi.find(*args, **kwargs)
+
+    @model_api(Expense)
+    def fire_expense_event(self, mapi, id, event, **kwargs):
         return mapi.fire(id, event, **kwargs)
 
     @model_api(Generator)
@@ -306,6 +319,68 @@ class InvoicesApi(CrudModelApi):
             endpoint = '{0}/regular'.format(self.endpoint)
 
         return ModelList(self, endpoint, params)
+
+
+class ExpensesApi(CrudModelApi):
+    """If number argument is givent returms single Expense object (or None),
+    otherwise iterable list of expenses are returned.
+    """
+    model_type = Expense
+    endpoint = 'expenses'
+
+    STATUSES = ['open', 'overdue', 'paid']
+    EVENTS = ['remove_payment', 'deliver', 'pay', 'lock', 'unlock']
+    EVENT_ARGS = {
+        'pay': {'paid_on', 'paid_amount', 'variable_symbol', 'bank_account_id'}
+    }
+
+    def fire(self, expense_id, event, **kwargs):
+        if not isinstance(expense_id, int):
+            raise TypeError('expense_id must be int')
+        if event not in self.EVENTS:
+            raise ValueError('invalid event, expected one of {0}'.format(', '.join(self.EVENTS)))
+
+        allowed_args = self.EVENT_ARGS.get(event, set())
+        if not set(kwargs.keys()).issubset(allowed_args):
+            msg = "invalid event arguments, only {0} can be used with {1}".format(', '.join(allowed_args), event)
+            raise ValueError(msg)
+
+        params = {'event': event}
+        params.update(kwargs)
+
+        if 'paid_on' in params:
+            if not isinstance(params['paid_on'], date):
+                raise TypeError("'paid_on' argument must be date")
+            params['paid_on'] = params['paid_on'].isoformat()
+
+        self.session._post('expenses/{0}/fire'.format(expense_id), {}, params=params)
+
+    def find(self, subject_id=None, since=None, updated_since=None, number=None, status=None, custom_id=None, variable_symbol=None):
+        params = {}
+        if subject_id:
+            if not isinstance(subject_id, int):
+                raise TypeError("'subject_id' parameter must be int")
+            params['subject_id'] = subject_id
+        if since:
+            if not isinstance(since, (datetime, date)):
+                raise TypeError("'since' parameter must be date or datetime")
+            params['since'] = since.isoformat()
+        if updated_since:
+            if not isinstance(updated_since, (datetime, date)):
+                raise TypeError("'updated_since' parameter must be date or datetime")
+            params['updated_since'] = updated_since.isoformat()
+        if number:
+            params['number'] = number
+        if custom_id:
+            params['custom_id'] = custom_id
+        if status:
+            if status not in self.STATUSES:
+                raise ValueError('invalid invoice status, expected one of {0}'.format(', '.join(self.STATUSES)))
+            params['status'] = status
+        if variable_symbol:
+            params['variable_symbol'] = variable_symbol
+
+        return ModelList(self, self.endpoint, params)
 
 
 class GeneratorsApi(CrudModelApi):
