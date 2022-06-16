@@ -1,0 +1,12 @@
+[
+    {
+        "id": 123456,
+        "name": "Test Bank Account",
+        "currency": "EUR",
+        "number": "123456789/4242",
+        "iban": "",
+        "swift_bic": "",
+        "pairing": false,
+        "payment_adjustment": false
+    }
+]

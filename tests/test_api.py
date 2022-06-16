@@ -26,6 +26,20 @@ class AccountTestCase(FakturoidTestCase):
         self.assertEqual("testdph@test.cz", account.email)
 
 
+class BankAccountsTestCase(FakturoidTestCase):
+
+    @patch('requests.get', return_value=response('bank_accounts.json'))
+    def test_load(self, mock):
+        bank_accounts = self.fa.bank_accounts()
+
+        self.assertEqual('https://app.fakturoid.cz/api/v2/accounts/myslug/bank_accounts.json', mock.call_args[0][0])
+        self.assertEqual(1, len(bank_accounts))
+        self.assertEqual(123456, bank_accounts[0].id)
+        self.assertEqual("Test Bank Account", bank_accounts[0].name)
+        self.assertEqual("EUR", bank_accounts[0].currency)
+        self.assertEqual("123456789/4242", bank_accounts[0].number)
+
+
 class SubjectTestCase(FakturoidTestCase):
 
     @patch('requests.get', return_value=response('subject_28.json'))

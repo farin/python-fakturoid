@@ -5,7 +5,7 @@ from functools import wraps
 
 import requests
 
-from fakturoid.models import Account, Subject, Invoice, Generator, Message
+from fakturoid.models import Account, BankAccount, Subject, Invoice, Generator, Message
 from fakturoid.paging import ModelList
 
 __all__ = ['Fakturoid']
@@ -33,6 +33,7 @@ class Fakturoid(object):
             Invoice: InvoicesApi(self),
             Generator: GeneratorsApi(self),
             Message: MessagesApi(self),
+            BankAccount: BankAccountsApi(self)
         }
 
         # Hack to expose full seach on subjects as
@@ -62,6 +63,10 @@ class Fakturoid(object):
 
     def account(self):
         return self._models_api[Account].load()
+
+    @model_api(BankAccount)
+    def bank_accounts(self, mapi):
+        return mapi.load()
 
     @model_api(Subject)
     def subject(self, mapi, id):
@@ -207,6 +212,15 @@ class CrudModelApi(ModelApi):
 class AccountApi(ModelApi):
     model_type = Account
     endpoint = 'account'
+
+    def load(self):
+        response = self.session._get(self.endpoint)
+        return self.unpack(response)
+
+
+class BankAccountsApi(ModelApi):
+    model_type = BankAccount
+    endpoint = "bank_accounts"
 
     def load(self):
         response = self.session._get(self.endpoint)
