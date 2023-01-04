@@ -5,7 +5,8 @@ from dateutil.parser import parse
 
 from fakturoid import six
 
-__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator', 'Message']
+__all__ = ['Account', 'Subject', 'InvoiceLine', 'Invoice', 'Generator',
+           'Message', 'Expense']
 
 
 class Model(six.UnicodeMixin):
@@ -154,6 +155,27 @@ class Invoice(AbstractInvoice):
             'exchange_rate', 'subtotal', 'total',
             'native_subtotal', 'native_total', 'remaining_amount',
             'remaining_native_amount'
+        ]
+
+    def __unicode__(self):
+        return self.number
+
+
+class Expense(AbstractInvoice):
+    """See http://docs.fakturoid.apiary.io/ for complete field reference."""
+    number = None
+
+    class Meta:
+        readonly = [
+            'id', 'supplier_name', 'supplier_street', 'supplier_city',
+            'supplier_zip', 'supplier_country', 'supplier_registration_no',
+            'supplier_vat_no', 'status', 'paid_on', 'subtotal', 'total',
+            'native_subtotal', 'native_total', 'html_url', 'url', 'subject_url',
+            'created_at', 'updated_at'
+        ]
+        decimal = [
+            'exchange_rate', 'subtotal', 'total',
+            'native_subtotal', 'native_total'
         ]
 
     def __unicode__(self):
