@@ -98,7 +98,7 @@ fa.invoices()[-1]   # loads first issued invoice (invoices are ordered from late
 
 <code>Fakturoid.<b>fire_invoice_event(id, event, **args)</b></code>
 
-Fires basic events on invoice. All events are described in [Fakturoid API docs](http://docs.fakturoid.apiary.io/#reference/invoices/invoice-actions/akce-nad-fakturou).
+Fires basic events on invoice. All events are described in [Fakturoid API docs](https://fakturoid.docs.apiary.io/#reference/invoices/invoice-actions/akce-nad-fakturou).
 
 Pay event can accept optional arguments `paid_at` and `paid_amount`
 ```python
@@ -139,29 +139,29 @@ fa.delete(Subject(id=1234))   # or alternativelly delete is possible without obj
 
 ### Models
 
-All models fields are named same as  [Fakturoid API](http://docs.fakturoid.apiary.io/).
+All models fields are named same as  [Fakturoid API](https://fakturoid.docs.apiary.io/).
 
 Values are mapped to corresponding `int`, `decimal.Decimal`, `datetime.date` and `datetime.datetime` types.
 
 <code>Fakturoid.<b>Account</b></code>
 
-[http://docs.fakturoid.apiary.io/#reference/account](http://docs.fakturoid.apiary.io/#reference/account)
+[https://fakturoid.docs.apiary.io/#reference/account](https://fakturoid.docs.apiary.io/#reference/account)
 
 <code>Fakturoid.<b>Subject</b></code>
 
-[http://docs.fakturoid.apiary.io/#reference/subjects](http://docs.fakturoid.apiary.io/#reference/subjects)
+[https://fakturoid.docs.apiary.io/#reference/subjects](https://fakturoid.docs.apiary.io/#reference/subjects)
 
 <code>Fakturoid.<b>Invoice</b></code><br>
 <code>Fakturoid.<b>InvoiceLine</b></code>
 
-[http://docs.fakturoid.apiary.io/#reference/invoices](http://docs.fakturoid.apiary.io/#reference/invoices)
+[https://fakturoid.docs.apiary.io/#reference/invoices](https://fakturoid.docs.apiary.io/#reference/invoices)
 
 <code>Fakturoid.<b>Generator</b></code>
 
-[http://docs.fakturoid.apiary.io/#reference/generators](http://docs.fakturoid.apiary.io/#reference/generators)
+[https://fakturoid.docs.apiary.io/#reference/generators](https://fakturoid.docs.apiary.io/#reference/generators)
 
 Use `InvoiceLine` for generator lines
 
 <code>Fakturoid.<b>Message</b></code>
 
-[http://docs.fakturoid.apiary.io/#reference/messages](http://docs.fakturoid.apiary.io/#reference/messages)
+[http://fakturoid.docs.apiary.io/#reference/messages](https://fakturoid.docs.apiary.io/#reference/messages)
